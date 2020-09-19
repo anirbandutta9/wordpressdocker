@@ -52,10 +52,27 @@ services:
      restart: always
      ports:
       - '80:80'
+      - '443:443'
      volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - web-root:/var/www/html
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - ./dhparam:/etc/ssl/certs
      networks:
       - wpsite
+
+   certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - nginx
+    command: certonly --webroot --webroot-path=/var/www/html --email sammy@website1.cloudip.online --agree-tos --no-eff-email -d website1.cloudip.online  
+   
 
    redis: 
      image: redis
@@ -70,3 +87,7 @@ networks:
 volumes:
   database:
   public_html: 
+  certbot-etc:
+  certbot-var:
+  web-root:
+  dhparam:
